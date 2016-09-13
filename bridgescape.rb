@@ -49,20 +49,28 @@ create_points(5, canvas_width, guide_slope, left_point, right_point, mountain_po
 
 mountain_points.unshift(left_point)
 mountain_points.push(right_point)
-p mountain_points
+mountain_points.push([canvas_width, canvas_height], [0, canvas_height])
+mountain_points
 
 
 mountain_points = mountain_points.flatten
 
 
 
-require 'rvg/rvg'
-include Magick
-RVG::dpi = 360
+require 'rmagick'
 
-rvg = RVG.new(5.in, 5.in).viewbox(0,0,1000,1000) do |canvas|
-	canvas.background_fill = 'white'
+imgl = Magick::ImageList.new
+imgl.new_image(1000, 1000)
 
-	draw.polyline(mountain_points)
-	end
-rvg.draw.write('mountain.png')
+
+gc = Magick::Draw.new
+gc.stroke('rgb(197, 235, 195)').stroke_width(3)
+gc.fill_opacity(1)
+gc.fill('rgb(197, 235, 195)')
+gc.polyline(*mountain_points)
+
+gc.draw(imgl)
+
+
+
+imgl.write("polyline.gif")
