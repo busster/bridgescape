@@ -37,16 +37,6 @@ def add_edge_points(left_point, right_point, mountain_points, canvas_width, canv
 	mountain_points
 end
 
-
-
-
-
-
-
-
-canvas_width = 1000
-canvas_height = 1000
-
 def mountain_shape(canvas_width, canvas_height)
 	mountain_points = []
 
@@ -56,13 +46,23 @@ def mountain_shape(canvas_width, canvas_height)
 	guide_slope = (right_point[1] - left_point[1]) / (canvas_width - 0)
 
 
-	create_points(5, canvas_width, guide_slope, left_point, right_point, mountain_points)
+	create_points(20, canvas_width, guide_slope, left_point, right_point, mountain_points)
 
 	add_edge_points(left_point, right_point, mountain_points, canvas_width, canvas_height)
 
 
 	mountain_points = mountain_points.flatten
 end
+
+
+
+
+
+
+canvas_width = 1000
+canvas_height = 1000
+
+
 
 
 
