@@ -16,57 +16,88 @@
 
 def create_points(divisions, width, guide_slope, left_point, right_point, mountain_points)
 	divisions.times do |n|
-	n = n.to_f
-	divisions = divisions.to_f
-	x_value = rand(((n / divisions) * width)..(((n + 1.0) / divisions) * width))
-	
-	y_guide = guide_slope * x_value + left_point[1]
-	y_range = (0.25 * ((1 / divisions) * width))
-	y_range_max = y_guide + y_range 
-	y_range_min = y_guide - y_range 
-	
-	y_value = rand(y_range_min..y_range_max)
-	mountain_points << [x_value, y_value]
+		n = n.to_f
+		divisions = divisions.to_f
+		x_value = rand(((n / divisions) * width)..(((n + 1.0) / divisions) * width))
+		
+		y_guide = guide_slope * x_value + left_point[1]
+		y_range = (0.25 * ((1 / divisions) * width))
+		y_range_max = y_guide + y_range 
+		y_range_min = y_guide - y_range 
+		
+		y_value = rand(y_range_min..y_range_max)
+		mountain_points << [x_value, y_value]
 	end
 end
+
+def add_edge_points(left_point, right_point, mountain_points, canvas_width, canvas_height)
+	mountain_points.unshift(left_point)
+	mountain_points.push(right_point)
+	mountain_points.push([canvas_width, canvas_height], [0, canvas_height])
+	mountain_points
+end
+
+
+
+
+
+
 
 
 canvas_width = 1000
 canvas_height = 1000
 
-mountain_points = []
+def mountain_shape(canvas_width, canvas_height)
+	mountain_points = []
+
+	left_point = [0, rand((0.25 * canvas_height)..(0.75 * canvas_height))]
+	right_point = [canvas_width, rand((0.25 * canvas_height)..(0.75 * canvas_height))]
+
+	guide_slope = (right_point[1] - left_point[1]) / (canvas_width - 0)
+
+
+	create_points(5, canvas_width, guide_slope, left_point, right_point, mountain_points)
+
+	add_edge_points(left_point, right_point, mountain_points, canvas_width, canvas_height)
+
+
+	mountain_points = mountain_points.flatten
+end
 
 
 
-p left_point = [0, rand((0.25 * canvas_height)..(0.75 * canvas_height))]
-p right_point = [canvas_width, rand((0.25 * canvas_height)..(0.75 * canvas_height))]
-
-p guide_slope = (right_point[1] - left_point[1]) / (canvas_width - 0)
-
-
-create_points(5, canvas_width, guide_slope, left_point, right_point, mountain_points)
+# mountains = []
+# 5.times do
+# 	mountains << mountain_shape
+# end
 
 
-mountain_points.unshift(left_point)
-mountain_points.push(right_point)
-mountain_points.push([canvas_width, canvas_height], [0, canvas_height])
-mountain_points
 
 
-mountain_points = mountain_points.flatten
 
+color_1 = 'rgb(197, 235, 195)'
+color_2 = 'rgb(183, 200, 181)'
 
 
 require 'rmagick'
 
 imgl = Magick::ImageList.new
-imgl.new_image(1000, 1000)
+imgl.new_image(canvas_width, canvas_height)
 
 
 gc = Magick::Draw.new
-gc.stroke('rgb(197, 235, 195)').stroke_width(3)
+
+mountain_points = mountain_shape(canvas_width, canvas_height)
+gc.stroke(color_1).stroke_width(3)
 gc.fill_opacity(1)
-gc.fill('rgb(197, 235, 195)')
+gc.fill(color_1)
+gc.polyline(*mountain_points)
+
+
+mountain_points = mountain_shape(canvas_width, canvas_height)
+gc.stroke(color_2).stroke_width(3)
+gc.fill_opacity(1)
+gc.fill(color_2)
 gc.polyline(*mountain_points)
 
 gc.draw(imgl)
