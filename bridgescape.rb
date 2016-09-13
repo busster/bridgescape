@@ -14,6 +14,12 @@
 # 	- put (x,y) into array
 
 
+# *********** Notes to add **************
+# random inspirational quotes
+# fog - just another line same color different opacity
+
+
+
 def create_points(divisions, width, guide_slope, left_point, right_point, mountain_points)
 	divisions.times do |n|
 		n = n.to_f
