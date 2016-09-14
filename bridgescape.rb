@@ -60,9 +60,20 @@ def mountain_shape(canvas_width, canvas_height)
 	mountain_points = mountain_points.flatten
 end
 
+def fog_mountain_color(color)
+	opacity = rand(0.0..0.25).to_s
+	fog_color = color.split('rgb').join
+	fog_color = fog_color.split(',')
+	fog_color = fog_color.insert(-2, ' ' + opacity).join(',')
+	fog_color = "rgba" + fog_color
+end
 
-
-
+def draw_mountain(color, gc, canvas_width, canvas_height)
+	mountain_points = mountain_shape(canvas_width, canvas_height)
+	gc.stroke(color).stroke_width(0)
+	gc.fill(color)
+	gc.polyline(*mountain_points)
+end
 
 
 canvas_width = 1000
@@ -72,17 +83,19 @@ canvas_height = 1000
 
 
 
-# mountains = []
-# 5.times do
-# 	mountains << mountain_shape
-# end
 
 
 
 
 
-color_1 = 'rgb(197, 235, 195)'
-color_2 = 'rgb(183, 200, 181)'
+
+color_1 = 'rgb(197, 235, 195,)'
+color_1a = fog_mountain_color(color_1)
+color_2 = 'rgb(183, 200, 181,)'
+color_2a = fog_mountain_color(color_2)
+
+color_list = [color_1,color_1a,color_2,color_2a]
+
 
 
 require 'rmagick'
@@ -93,18 +106,13 @@ imgl.new_image(canvas_width, canvas_height)
 
 gc = Magick::Draw.new
 
-mountain_points = mountain_shape(canvas_width, canvas_height)
-gc.stroke(color_1).stroke_width(3)
-gc.fill_opacity(1)
-gc.fill(color_1)
-gc.polyline(*mountain_points)
+
+color_list.each do |color|
+	draw_mountain(color, gc, canvas_width, canvas_height)
+end
 
 
-mountain_points = mountain_shape(canvas_width, canvas_height)
-gc.stroke(color_2).stroke_width(3)
-gc.fill_opacity(1)
-gc.fill(color_2)
-gc.polyline(*mountain_points)
+
 
 gc.draw(imgl)
 
