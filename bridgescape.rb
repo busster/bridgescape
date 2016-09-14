@@ -17,6 +17,8 @@
 # *********** Notes to add **************
 # random inspirational quotes
 # fog - just another line same color different opacity
+# write loop to keep generating mo\t line until it is below previous or has crossed it
+
 
 
 
@@ -60,13 +62,13 @@ def mountain_shape(canvas_width, canvas_height)
 	mountain_points = mountain_points.flatten
 end
 
-def fog_mountain_color(color)
-	opacity = rand(0.0..0.25).to_s
-	fog_color = color.split('rgb').join
-	fog_color = fog_color.split(',')
-	fog_color = fog_color.insert(-2, ' ' + opacity).join(',')
-	fog_color = "rgba" + fog_color
-end
+# def fog_mountain_color(color)
+# 	opacity = rand(0.0..0.25).to_s
+# 	fog_color = color.split('rgb').join
+# 	fog_color = fog_color.split(',')
+# 	fog_color = fog_color.insert(-2, ' ' + opacity).join(',')
+# 	fog_color = "rgba" + fog_color
+# end
 
 def draw_mountain(color, gc, canvas_width, canvas_height)
 	mountain_points = mountain_shape(canvas_width, canvas_height)
@@ -75,28 +77,59 @@ def draw_mountain(color, gc, canvas_width, canvas_height)
 	gc.polyline(*mountain_points)
 end
 
+def generate_color
+	random_color = []
+	3.times do 
+		random_color << rand(0..255)
+	end
+	random_color
+end
+def generate_complimentary_colors(number_of_colors, constant_color)
+	colors = []
+	number_of_colors.times do
+		random_color = generate_color
+		new_color = []
+		3.times do |i|
+			new_rgb_value = (random_color[i] + constant_color[i]) / 2
+			new_color << new_rgb_value
+		end
+		colors << new_color
+	end
+	colors
+end
 
-canvas_width = 1000
-canvas_height = 1000
+def rgb_format_color_array(colors)
+	color_list = []
+	colors.each do |color|
+		format = color.join(', ').prepend('rgb(') << ')'
+		color_list << format
+	end
+	color_list
+end
+
+def rgba_format_color_array(colors)
+	color_list = []
+	colors.each do |color|
+		opacity = rand(0.0..0.15).to_s
+		format = color.join(', ').prepend('rgba(') << ', ' + opacity + ')'
+		color_list << format
+	end
+	color_list
+end
 
 
 
 
 
+canvas_width = 5000
+canvas_height = 2500
 
+colors = generate_complimentary_colors(7, generate_color)
 
+rgb_color_list = rgb_format_color_array(colors)
+rgba_color_list = rgba_format_color_array(colors)
 
-
-
-
-color_1 = 'rgb(197, 235, 195,)'
-color_1a = fog_mountain_color(color_1)
-color_2 = 'rgb(183, 200, 181,)'
-color_2a = fog_mountain_color(color_2)
-
-color_list = [color_1,color_1a,color_2,color_2a]
-
-
+master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
 
 require 'rmagick'
 
@@ -107,7 +140,11 @@ imgl.new_image(canvas_width, canvas_height)
 gc = Magick::Draw.new
 
 
-color_list.each do |color|
+gc.fill(rgba_color_list[0])
+gc.rectangle(0,0,canvas_width,canvas_height)
+
+
+master_color_list.each do |color|
 	draw_mountain(color, gc, canvas_width, canvas_height)
 end
 
@@ -118,4 +155,27 @@ gc.draw(imgl)
 
 
 
-imgl.write("polyline.gif")
+imgl.write("polyline.png")
+
+
+
+
+
+######################
+######## OLD #########
+######################
+
+
+# color_list = []
+# 50.times do
+# 	color_list << generate_color
+# end
+
+
+
+# color_1 = 'rgb(197, 235, 195,)'
+# color_1a = fog_mountain_color(color_1)
+# color_2 = 'rgb(183, 200, 181,)'
+# color_2a = fog_mountain_color(color_2)
+
+# color_list = [color_1a,color_1,color_2a,color_2]
