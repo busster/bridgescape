@@ -62,13 +62,6 @@ def mountain_shape(canvas_width, canvas_height)
 	mountain_points = mountain_points.flatten
 end
 
-# def fog_mountain_color(color)
-# 	opacity = rand(0.0..0.25).to_s
-# 	fog_color = color.split('rgb').join
-# 	fog_color = fog_color.split(',')
-# 	fog_color = fog_color.insert(-2, ' ' + opacity).join(',')
-# 	fog_color = "rgba" + fog_color
-# end
 
 def draw_mountain(color, gc, canvas_width, canvas_height)
 	mountain_points = mountain_shape(canvas_width, canvas_height)
