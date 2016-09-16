@@ -68,7 +68,7 @@ class Mountain
 	end
 
 	def check_line(i)
-		good_line = false
+		@good_line = false
 		# if the slopes are the same
 		if @lines_array[i][:guide_slope] != @lines_array[i - 1][:guide_slope]
 
@@ -77,23 +77,27 @@ class Mountain
 			# if the slope of the line is a positive int
 			if @lines_array[i][:guide_slope] > 0
 				# make it a negative int
-				slope_difference = @lines_array[i - 1][:guide_slope] - @lines_array[i][:guide_slope]
-			else
 				slope_difference = @lines_array[i - 1][:guide_slope] + @lines_array[i][:guide_slope]
+			else
+				slope_difference = @lines_array[i - 1][:guide_slope] - @lines_array[i][:guide_slope]
 			end
 
 			x_value = y_intercept_difference / slope_difference
 			y_value = @lines_array[i][:guide_slope] * x_value + @lines_array[i][:left_point][1]
 
 			if x_value.between?(0, CANVAS_WIDTH) && y_value.between?(0, CANVAS_HEIGHT)
-				good_line = true
+				@good_line = true
+			else
+				if @lines_array[i][:left_point][1] < @lines_array[i - 1][:left_point][1]
+					@good_line = true
+				end
 			end
 		else
 			 if @lines_array[i][:left_point][1] > @lines_array[i - 1][:left_point][1]
-			 	good_line = true
+			 	@good_line = true
 			 end
 		end
-		good_line
+		@good_line
 	end
 
 	def create_mountain_points
@@ -130,20 +134,20 @@ mt = Mountain.new
 		mt.create_rand_line(i)
 		puts "made #{i} line"
 	else
-		mt.create_rand_line(i)
-		p mt.check_line(i)
-		# while !mt.good_line
-		# 	mt.create_rand_line(i)
-		# 	mt.check_line(i)
-		# 	puts "made #{i} line"
-		# end
+		counter = 0
+		while !mt.good_line
+			mt.create_rand_line(i)
+			mt.check_line(i)
+			puts "attempt: #{counter}"
+			counter += 1
+		end
 	end
 	puts "-" * 50
 end
-
+puts "-" * 50
 mt.lines_array.each do |a|
 	p a[:guide_slope]
-	p a[:left_point]
+	p a[:left_point][1]
 	p a[:right_point]
 	p "-" * 50
 end
