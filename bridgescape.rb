@@ -28,25 +28,22 @@ CANVAS_HEIGHT = 2500
 
 class Mountain
 	attr_accessor :point_list
+	attr_reader :good_line, :lines_array
 
 	def initialize
 		@point_list = []
 		@left_point = []
 		@right_point = []
-		@left_points_array = []
-		@right_points_array = []
-		@guide_slope_array = []
+		@lines_array = []
 		@guide_slope = 0
 		@line = 0
 	end
 
-	def create_rand_line
+	def create_rand_line(current_index)
 		@left_point = [0, rand((0.25 * CANVAS_HEIGHT)..(0.75 * CANVAS_HEIGHT))]
 		@right_point = [CANVAS_WIDTH, rand((0.25 * CANVAS_HEIGHT)..(0.75 * CANVAS_HEIGHT))]
 		@guide_slope = (@right_point[1] - @left_point[1]) / (CANVAS_WIDTH - 0)
-		@left_points_array << @left_point
-		@right_points_array << @right_point
-		@guide_slope_array << @guide_slope
+		@lines_array[current_index] = {left_point: @left_point, right_point: @right_point, guide_slope: @guide_slope}
 	end
 	def add_base_points
 		@point_list.unshift(@left_point)
@@ -70,23 +67,31 @@ class Mountain
 		end
 	end
 
-	def check_line(current_index)
+	def check_line(i)
 		good_line = false
-		if @guide_slope_array[current_index] != @guide_slope_array[current_index - 1]
-			if @left_points_array[current_index - 1] > 0
-				@left_points_array[current_index - 1] = @left_points_array[current_index - 1] * -1
-			end
-			if @guide_slope_array[current_index ] > 0
-				@guide_slope_array[current_index] = @guide_slope_array[current_index] * -1
+		# if the slopes are the same
+		if @lines_array[i][:guide_slope] != @lines_array[i - 1][:guide_slope]
+
+			y_intercept_difference = @lines_array[i][:left_point][1] - @lines_array[i - 1][:left_point][1]
+			
+			# if the slope of the line is a positive int
+			if @lines_array[i][:guide_slope] > 0
+				# make it a negative int
+				slope_difference = @lines_array[i - 1][:guide_slope] - @lines_array[i][:guide_slope]
+			else
+				slope_difference = @lines_array[i - 1][:guide_slope] + @lines_array[i][:guide_slope]
 			end
 
-			x_value = (@left_points_array[current_index] + @left_points_array[current_index - 1]) / (@guide_slope_array[current_index - 1] + @guide_slope_array[current_index])
-			y_value = @guide_slope_array[current_index] * x_value + @left_points_array[current_index]
+			x_value = y_intercept_difference / slope_difference
+			y_value = @lines_array[i][:guide_slope] * x_value + @lines_array[i][:left_point][1]
 
-			if x_value < CANVAS_WIDTH && y_value < CANVAS_HEIGHT
+			if x_value.between?(0, CANVAS_WIDTH) && y_value.between?(0, CANVAS_HEIGHT)
 				good_line = true
-		# else
-		# 	if 
+			end
+		else
+			 if @lines_array[i][:left_point][1] > @lines_array[i - 1][:left_point][1]
+			 	good_line = true
+			 end
 		end
 	end
 
@@ -98,25 +103,42 @@ class Mountain
 
 end
 
-mt = Mountain.new
+# mt = Mountain.new
 	
-2.times do |i|
-	p mt.create_rand_line
-	if i > 1
-		while !mt.check_line(i)
-			p mt.create_rand_line
+# 2.times do |i|
+# 	p mt.create_rand_line
+# 	if i > 1
+# 		while !mt.check_line(i)
+# 			p mt.create_rand_line
+# 	end
+# 	p mt.create_points_on_slope(21)
+# 	p mt.add_base_points
+
+# # => draw the line
+
+# 	# p mt.create_mountain_points
+# 	mt.point_list = []
+# 	p "-" * 50
+# end
+
+mt = Mountain.new
+
+10.times do |i|
+	if mt.lines_array[i - 1] == nil
+		mt.create_rand_line(i)
+	else
+		while !mt.good_line
+			mt.create_rand_line(i)
+			mt.check_line(i)
+		end
 	end
-	p mt.create_points_on_slope(21)
-	p mt.add_base_points
-
-# => draw the line
-
-	# p mt.create_mountain_points
-	mt.point_list = []
-	p "-" * 50
+	puts "yay!"
 end
+		
 
-# if line array is nil
+
+# 10.times do |i|
+# if line array (i - 1) is nil
 # 	creat a line x
 # elsif
 # 	while good line is false
