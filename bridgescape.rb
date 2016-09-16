@@ -93,6 +93,7 @@ class Mountain
 			 	good_line = true
 			 end
 		end
+		good_line
 	end
 
 	def create_mountain_points
@@ -123,16 +124,28 @@ end
 
 mt = Mountain.new
 
-10.times do |i|
+2.times do |i|
+	puts "on: #{i} iteration"
 	if mt.lines_array[i - 1] == nil
 		mt.create_rand_line(i)
+		puts "made #{i} line"
 	else
-		while !mt.good_line
-			mt.create_rand_line(i)
-			mt.check_line(i)
-		end
+		mt.create_rand_line(i)
+		p mt.check_line(i)
+		# while !mt.good_line
+		# 	mt.create_rand_line(i)
+		# 	mt.check_line(i)
+		# 	puts "made #{i} line"
+		# end
 	end
-	puts "yay!"
+	puts "-" * 50
+end
+
+mt.lines_array.each do |a|
+	p a[:guide_slope]
+	p a[:left_point]
+	p a[:right_point]
+	p "-" * 50
 end
 		
 
