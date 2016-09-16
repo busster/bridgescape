@@ -21,50 +21,106 @@
 
 
 
+CANVAS_WIDTH = 5000
+CANVAS_HEIGHT = 2500
 
-def create_points(divisions, width, guide_slope, left_point, right_point, mountain_points)
-	divisions.times do |n|
-		n = n.to_f
-		divisions = divisions.to_f
-		x_value = rand(((n / divisions) * width)..(((n + 1.0) / divisions) * width))
-		
-		y_guide = guide_slope * x_value + left_point[1]
-		y_range = (0.25 * ((1 / divisions) * width))
-		y_range_max = y_guide + y_range 
-		y_range_min = y_guide - y_range 
-		
-		y_value = rand(y_range_min..y_range_max)
-		mountain_points << [x_value, y_value]
+
+
+class Mountain
+	attr_accessor :point_list
+
+	def initialize
+		@point_list = []
+		@left_point = []
+		@right_point = []
+		@left_points_array = []
+		@right_points_array = []
+		@guide_slope_array = []
+		@guide_slope = 0
+		@line = 0
 	end
+
+	def create_rand_line
+		@left_point = [0, rand((0.25 * CANVAS_HEIGHT)..(0.75 * CANVAS_HEIGHT))]
+		@right_point = [CANVAS_WIDTH, rand((0.25 * CANVAS_HEIGHT)..(0.75 * CANVAS_HEIGHT))]
+		@guide_slope = (@right_point[1] - @left_point[1]) / (CANVAS_WIDTH - 0)
+		@left_points_array << @left_point
+		@right_points_array << @right_point
+		@guide_slope_array << @guide_slope
+	end
+	def add_base_points
+		@point_list.unshift(@left_point)
+		@point_list.push(@right_point)
+		@point_list.push([CANVAS_WIDTH, CANVAS_HEIGHT], [0, CANVAS_HEIGHT])
+		@point_list = @point_list.flatten
+	end
+	def create_points_on_slope(divisions)
+		divisions.times do |n|
+			n = n.to_f
+			divisions = divisions.to_f
+			x_value = rand(((n / divisions) * CANVAS_WIDTH)..(((n + 1.0) / divisions) * CANVAS_WIDTH))
+			
+			y_guide = @guide_slope * x_value + @left_point[1]
+			y_range = (0.25 * ((1 / divisions) * CANVAS_WIDTH))
+			y_range_max = y_guide + y_range 
+			y_range_min = y_guide - y_range 
+			
+			y_value = rand(y_range_min..y_range_max)
+			@point_list << [x_value, y_value]
+		end
+	end
+
+	def check_line(current_index)
+		good_line = false
+		if @guide_slope_array[current_index] != @guide_slope_array[current_index - 1]
+			if @left_points_array[current_index - 1] > 0
+				@left_points_array[current_index - 1] = @left_points_array[current_index - 1] * -1
+			end
+			if @guide_slope_array[current_index ] > 0
+				@guide_slope_array[current_index] = @guide_slope_array[current_index] * -1
+			end
+
+			x_value = (@left_points_array[current_index] + @left_points_array[current_index - 1]) / (@guide_slope_array[current_index - 1] + @guide_slope_array[current_index])
+			y_value = @guide_slope_array[current_index] * x_value + @left_points_array[current_index]
+
+			if x_value < CANVAS_WIDTH && y_value < CANVAS_HEIGHT
+				good_line = true
+		# else
+		# 	if 
+		end
+	end
+
+	def create_mountain_points
+		create_rand_line
+		create_points_on_slope(21)
+		add_base_points
+	end
+
 end
 
-def add_edge_points(left_point, right_point, mountain_points, canvas_width, canvas_height)
-	mountain_points.unshift(left_point)
-	mountain_points.push(right_point)
-	mountain_points.push([canvas_width, canvas_height], [0, canvas_height])
-	mountain_points
+mt = Mountain.new
+	
+2.times do |i|
+	p mt.create_rand_line
+	if i > 1
+		p mt.check_line(i)
+	end
+	p mt.create_points_on_slope(21)
+	p mt.add_base_points
+
+# => draw the line
+
+	# p mt.create_mountain_points
+	mt.point_list = []
+	p "-" * 50
 end
 
-def mountain_shape(canvas_width, canvas_height)
-	mountain_points = []
-
-	left_point = [0, rand((0.25 * canvas_height)..(0.75 * canvas_height))]
-	right_point = [canvas_width, rand((0.25 * canvas_height)..(0.75 * canvas_height))]
-
-	guide_slope = (right_point[1] - left_point[1]) / (canvas_width - 0)
 
 
-	create_points(20, canvas_width, guide_slope, left_point, right_point, mountain_points)
-
-	add_edge_points(left_point, right_point, mountain_points, canvas_width, canvas_height)
-
-
-	mountain_points = mountain_points.flatten
-end
 
 
 def draw_mountain(color, gc, canvas_width, canvas_height)
-	mountain_points = mountain_shape(canvas_width, canvas_height)
+	mountain_points = create_mountain_points(21)
 	gc.stroke(color).stroke_width(0)
 	gc.fill(color)
 	gc.polyline(*mountain_points)
@@ -114,41 +170,43 @@ end
 
 
 
-canvas_width = 5000
-canvas_height = 2500
-
-colors = generate_complimentary_colors(7, generate_color)
-
-rgb_color_list = rgb_format_color_array(colors)
-rgba_color_list = rgba_format_color_array(colors)
-
-master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
-
-require 'rmagick'
-
-imgl = Magick::ImageList.new
-imgl.new_image(canvas_width, canvas_height)
-
-
-gc = Magick::Draw.new
-
-
-gc.fill(rgba_color_list[0])
-gc.rectangle(0,0,canvas_width,canvas_height)
-
-
-master_color_list.each do |color|
-	draw_mountain(color, gc, canvas_width, canvas_height)
-end
 
 
 
 
-gc.draw(imgl)
+
+# colors = generate_complimentary_colors(7, generate_color)
+
+# rgb_color_list = rgb_format_color_array(colors)
+# rgba_color_list = rgba_format_color_array(colors)
+
+# master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
+
+# require 'rmagick'
+
+# imgl = Magick::ImageList.new
+# imgl.new_image(canvas_width, canvas_height)
+
+
+# gc = Magick::Draw.new
+
+
+# gc.fill(rgba_color_list[0])
+# gc.rectangle(0,0,canvas_width,canvas_height)
+
+
+# master_color_list.each do |color|
+# 	draw_mountain(color, gc, canvas_width, canvas_height)
+# end
 
 
 
-imgl.write("polyline.png")
+
+# gc.draw(imgl)
+
+
+
+# imgl.write("polyline.png")
 
 
 
