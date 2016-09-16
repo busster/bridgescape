@@ -103,7 +103,8 @@ mt = Mountain.new
 2.times do |i|
 	p mt.create_rand_line
 	if i > 1
-		p mt.check_line(i)
+		while !mt.check_line(i)
+			p mt.create_rand_line
 	end
 	p mt.create_points_on_slope(21)
 	p mt.add_base_points
@@ -114,6 +115,19 @@ mt = Mountain.new
 	mt.point_list = []
 	p "-" * 50
 end
+
+# if line array is nil
+# 	creat a line x
+# elsif
+# 	while good line is false
+# 		create line y
+# 		check line y against line x
+# 			if line y ok 
+# 				good line is true
+# 				line y = line x
+# create points for the line
+# add the base points
+# draw the line
 
 
 
