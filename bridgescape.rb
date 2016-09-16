@@ -82,13 +82,13 @@ class Mountain
 				slope_difference = @lines_array[i - 1][:guide_slope] - @lines_array[i][:guide_slope]
 			end
 
-			x_value = y_intercept_difference / slope_difference
-			y_value = @lines_array[i][:guide_slope] * x_value + @lines_array[i][:left_point][1]
+			p x_value = y_intercept_difference / slope_difference
+			p y_value = @lines_array[i][:guide_slope] * x_value + @lines_array[i][:left_point][1]
 
 			if x_value.between?(0, CANVAS_WIDTH) && y_value.between?(0, CANVAS_HEIGHT)
 				@good_line = true
 			else
-				if @lines_array[i][:left_point][1] < @lines_array[i - 1][:left_point][1]
+				if @lines_array[i][:left_point][1] > @lines_array[i - 1][:left_point][1]
 					@good_line = true
 				end
 			end
