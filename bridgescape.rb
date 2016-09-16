@@ -23,6 +23,7 @@
 
 CANVAS_WIDTH = 5000
 CANVAS_HEIGHT = 2500
+NUMBER_OF_DIVISIONS = 21
 
 
 
@@ -39,11 +40,11 @@ class Mountain
 		@line = 0
 	end
 
-	def create_rand_line(current_index)
+	def create_rand_line(i)
 		@left_point = [0, rand((0.25 * CANVAS_HEIGHT)..(0.75 * CANVAS_HEIGHT))]
 		@right_point = [CANVAS_WIDTH, rand((0.25 * CANVAS_HEIGHT)..(0.75 * CANVAS_HEIGHT))]
 		@guide_slope = (@right_point[1] - @left_point[1]) / (CANVAS_WIDTH - 0)
-		@lines_array[current_index] = {left_point: @left_point, right_point: @right_point, guide_slope: @guide_slope}
+		@lines_array[i] = {left_point: @left_point, right_point: @right_point, guide_slope: @guide_slope}
 	end
 	def add_base_points
 		@point_list.unshift(@left_point)
@@ -82,8 +83,8 @@ class Mountain
 				slope_difference = @lines_array[i - 1][:guide_slope] - @lines_array[i][:guide_slope]
 			end
 
-			p x_value = y_intercept_difference / slope_difference
-			p y_value = @lines_array[i][:guide_slope] * x_value + @lines_array[i][:left_point][1]
+			x_value = y_intercept_difference / slope_difference
+			y_value = @lines_array[i][:guide_slope] * x_value + @lines_array[i][:left_point][1]
 
 			if x_value.between?(0, CANVAS_WIDTH) && y_value.between?(0, CANVAS_HEIGHT)
 				@good_line = true
@@ -101,57 +102,22 @@ class Mountain
 	end
 
 	def create_mountain_points
-		create_rand_line
-		create_points_on_slope(21)
+		create_points_on_slope(NUMBER_OF_DIVISIONS)
 		add_base_points
 	end
 
 end
 
-# mt = Mountain.new
-	
-# 2.times do |i|
-# 	p mt.create_rand_line
-# 	if i > 1
-# 		while !mt.check_line(i)
-# 			p mt.create_rand_line
-# 	end
-# 	p mt.create_points_on_slope(21)
-# 	p mt.add_base_points
 
-# # => draw the line
 
-# 	# p mt.create_mountain_points
-# 	mt.point_list = []
-# 	p "-" * 50
-# end
 
-mt = Mountain.new
 
-2.times do |i|
-	puts "on: #{i} iteration"
-	if mt.lines_array[i - 1] == nil
-		mt.create_rand_line(i)
-		puts "made #{i} line"
-	else
-		counter = 0
-		while !mt.good_line
-			mt.create_rand_line(i)
-			mt.check_line(i)
-			puts "attempt: #{counter}"
-			counter += 1
-		end
-	end
-	puts "-" * 50
-end
-puts "-" * 50
-mt.lines_array.each do |a|
-	p a[:guide_slope]
-	p a[:left_point][1]
-	p a[:right_point]
-	p "-" * 50
-end
-		
+
+
+
+
+
+
 
 
 # 10.times do |i|
@@ -172,8 +138,8 @@ end
 
 
 
-def draw_mountain(color, gc, canvas_width, canvas_height)
-	mountain_points = create_mountain_points(21)
+def draw_mountain(color, gc)
+	mountain_points = mt.create_mountain_points
 	gc.stroke(color).stroke_width(0)
 	gc.fill(color)
 	gc.polyline(*mountain_points)
@@ -224,42 +190,68 @@ end
 
 
 
+colors = generate_complimentary_colors(n_mountains, generate_color)
+
+rgb_color_list = rgb_format_color_array(colors)
+rgba_color_list = rgba_format_color_array(colors)
+
+master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
 
 
 
 
-# colors = generate_complimentary_colors(7, generate_color)
-
-# rgb_color_list = rgb_format_color_array(colors)
-# rgba_color_list = rgba_format_color_array(colors)
-
-# master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
-
-# require 'rmagick'
-
-# imgl = Magick::ImageList.new
-# imgl.new_image(canvas_width, canvas_height)
-
-
-# gc = Magick::Draw.new
-
-
-# gc.fill(rgba_color_list[0])
-# gc.rectangle(0,0,canvas_width,canvas_height)
-
-
-# master_color_list.each do |color|
-# 	draw_mountain(color, gc, canvas_width, canvas_height)
-# end
 
 
 
 
-# gc.draw(imgl)
 
 
 
-# imgl.write("polyline.png")
+
+
+
+require 'rmagick'
+
+imgl = Magick::ImageList.new
+imgl.new_image(canvas_width, canvas_height)
+
+
+gc = Magick::Draw.new
+
+
+gc.fill(rgba_color_list[0])
+gc.rectangle(0,0,canvas_width,canvas_height)
+
+
+n_mountains = 4
+mt = Mountain.new
+
+n_mountains.times do |i|
+	puts "on: #{i} iteration"
+	if mt.lines_array[i - 1] == nil
+		mt.create_rand_line(i)
+		puts "made #{i} line"
+	else
+		counter = 0
+		while !mt.good_line
+			mt.create_rand_line(i)
+			mt.check_line(i)
+			puts "attempt: #{counter}"
+			counter += 1
+		end
+	end
+	puts "-" * 50
+	draw_mountain(master_color_list[i], gc)
+	mt.point_list = []
+end
+
+
+
+gc.draw(imgl)
+
+
+
+imgl.write("polyline.png")
 
 
 
