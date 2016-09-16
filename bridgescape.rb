@@ -138,8 +138,8 @@ end
 
 
 
-def draw_mountain(color, gc)
-	mountain_points = mt.create_mountain_points
+def draw_mountain(color, gc, mount_inst)
+	mountain_points = mount_inst.create_mountain_points
 	gc.stroke(color).stroke_width(0)
 	gc.fill(color)
 	gc.polyline(*mountain_points)
@@ -190,12 +190,6 @@ end
 
 
 
-colors = generate_complimentary_colors(n_mountains, generate_color)
-
-rgb_color_list = rgb_format_color_array(colors)
-rgba_color_list = rgba_format_color_array(colors)
-
-master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
 
 
 
@@ -213,35 +207,53 @@ master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
 require 'rmagick'
 
 imgl = Magick::ImageList.new
-imgl.new_image(canvas_width, canvas_height)
+imgl.new_image(CANVAS_WIDTH, CANVAS_HEIGHT)
 
 
 gc = Magick::Draw.new
 
 
+
+
+
+n_mountains = 3
+
+test_colors = ['red','green','blue','yellow','white','black','red','green','blue','yellow']
+
+colors = generate_complimentary_colors(n_mountains, generate_color)
+
+rgb_color_list = rgb_format_color_array(colors)
+rgba_color_list = rgba_format_color_array(colors)
+
+master_color_list = rgba_color_list.zip(rgb_color_list).flatten!
+
+
+
 gc.fill(rgba_color_list[0])
-gc.rectangle(0,0,canvas_width,canvas_height)
+gc.rectangle(0,0,CANVAS_WIDTH,CANVAS_HEIGHT)
 
 
-n_mountains = 4
+
 mt = Mountain.new
 
 n_mountains.times do |i|
 	puts "on: #{i} iteration"
-	if mt.lines_array[i - 1] == nil
+	if mt.lines_array[0] == nil
 		mt.create_rand_line(i)
+		p mt.lines_array
 		puts "made #{i} line"
 	else
 		counter = 0
 		while !mt.good_line
 			mt.create_rand_line(i)
+			p mt.lines_array
 			mt.check_line(i)
 			puts "attempt: #{counter}"
 			counter += 1
 		end
 	end
 	puts "-" * 50
-	draw_mountain(master_color_list[i], gc)
+	draw_mountain(test_colors[i], gc, mt)
 	mt.point_list = []
 end
 
